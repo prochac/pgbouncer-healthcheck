@@ -42,12 +42,15 @@ func initServer() *http.Server {
 func initDB() {
 	var err error
 	db, err = sql.Open("pgx", config.Connstr)
-	if err == nil {
-		log.Printf("Connected to PGBouncer database")
-	} else {
-		db = nil
-		log.Printf("Could not open database: %s", err)
+	if err != nil {
+		log.Printf("Connection string is invalid: %s", err)
+		os.Exit(1)
 	}
+	if err := db.Ping(); err != nil {
+		log.Printf("Could not connect to database: %s", err)
+		os.Exit(1)
+	}
+	log.Printf("Connected to PGBouncer database")
 }
 
 func version() {
