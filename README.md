@@ -211,6 +211,7 @@ Returns the results of PGBouncer's `SHOW CLIENTS` command formatted as JSON.
 Example:
 
 ```json
+[
   {
     "Type": "C",
     "User": "kldfwokoekrokerkreo",

@@ -1,4 +1,4 @@
-FROM golang:1.10.2-alpine as builder
+FROM golang:1.11-alpine3.7 as builder
 
 RUN apk add --no-cache alpine-sdk
 
@@ -9,10 +9,13 @@ RUN apk add --update pgbouncer bash shadow && \
     mkdir -p /var/run/postgresql && \
     chown pgbouncer /var/run/postgresql
 
-ADD vendor.sh $DIR/
+ENV GO111MODULE=on
+
 ADD build.sh $DIR/
-ADD Gopkg.toml $DIR/
-ADD Gopkg.lock $DIR/
+ADD go.mod $DIR/
+ADD go.sum $DIR/
+RUN go mod download
+
 ADD *.go $DIR/
 ADD VERSION $DIR/
 
@@ -21,5 +24,4 @@ ADD tests/userlist.txt /etc/pgbouncer/userlist.txt
 ADD tests/scripts /tests
 RUN chmod 755 /tests/*
 
-RUN $DIR/vendor.sh
 RUN $DIR/build.sh

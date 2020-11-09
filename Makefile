@@ -1,8 +1,8 @@
 APPNAME := pgbouncer-healthcheck
 VERSION := $(shell cat VERSION)
 
-src_files = *.go Gopkg.* VERSION
-docker = Dockerfile build.sh vendor.sh
+src_files = *.go go.* VERSION
+docker = Dockerfile build.sh
 test_files = tests/* tests/scripts/*
 
 build: $(APPNAME)
