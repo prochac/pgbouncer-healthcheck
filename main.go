@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kelseyhightower/envconfig"
-	_ "github.com/lib/pq"
 )
 
 var (
@@ -41,7 +41,7 @@ func initServer() *http.Server {
 
 func initDB() {
 	var err error
-	db, err = sql.Open("postgres", config.Connstr)
+	db, err = sql.Open("pgx", config.Connstr)
 	if err == nil {
 		log.Printf("Connected to PGBouncer database")
 	} else {
