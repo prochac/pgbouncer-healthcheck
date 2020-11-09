@@ -36,7 +36,7 @@ func handleHealth(ctx context.Context, w http.ResponseWriter, _ httprouter.Param
 }
 
 func probeLocalPort(port int) error {
-	conn, err := net.Dial("tcp", fmt.Sprintf(":%d", config.PGBouncerPort))
+	conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
 		conn.Close()
 	}
