@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/julienschmidt/httprouter"
@@ -18,7 +22,7 @@ var (
 	db     *sql.DB
 )
 
-func initServer() *http.Server {
+func initServer(ctx context.Context) *http.Server {
 	router := httprouter.New()
 
 	// Add a default root 200 handler
@@ -34,8 +38,14 @@ func initServer() *http.Server {
 		addDebugHandlers(router)
 	}
 	return &http.Server{
-		Handler: router,
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:              fmt.Sprintf(":%d", config.Port),
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		BaseContext: func(net.Listener) context.Context {
+			return ctx
+		},
 	}
 }
 
@@ -59,6 +69,8 @@ func version() {
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatalf("Could not process configuration: %s", err)
 	}
@@ -72,9 +84,20 @@ func main() {
 	}
 	flag.Parse()
 	initDB()
-	webserver := initServer()
+	webserver := initServer(ctx)
 	log.Printf("Listening on port %d", config.Port)
-	if err := webserver.ListenAndServe(); err != nil {
-		log.Fatalf("Error occured while listening for connections: %s", err)
+	go func() {
+		if err := webserver.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("Error occured while listening for connections: %s", err)
+		}
+	}()
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, os.Interrupt)
+	<-s
+	cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+	if err := webserver.Shutdown(shutdownCtx); err != nil {
+		log.Printf("HTTP server Shutdown: %v", err)
 	}
 }
