@@ -7,15 +7,10 @@ import (
 	"net/http"
 	"os/exec"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 )
 
-func addHealthHandlers(router *httprouter.Router) {
-	router.GET("/health", makeRequestHandlerWithContext(handleHealth))
-}
-
-func handleHealth(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleHealth(ctx context.Context, _ http.ResponseWriter) error {
 	// This is a blind yes/no response
 	var err error
 	if config.EnhancedCheck {

@@ -7,7 +7,6 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible
-	github.com/julienschmidt/httprouter v1.2.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/pkg/errors v0.8.1

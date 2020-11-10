@@ -13,7 +13,6 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/stdlib"
-	"github.com/julienschmidt/httprouter"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -23,23 +22,21 @@ var (
 )
 
 func initServer(ctx context.Context) *http.Server {
-	router := httprouter.New()
-
+	var mux Mux
 	// Add a default root 200 handler
-	router.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {})
-
+	mux.OK("/")
 	// Add a version endpoint
-	router.GET("/ami-version", makeRequestHandlerFile("version info", "/etc/ami_version"))
-
-	addHealthHandlers(router)
-	addStatusHandlers(router)
+	mux.File("/ami-version", "version info", "/etc/ami_version")
+	// Add a health handler
+	mux.GET("/health", requestHandler(handleHealth))
+	addStatusHandlers(&mux)
 	if config.EnableDebugEndpoints {
 		log.Print("Enabling Debug Endpoints")
-		addDebugHandlers(router)
+		addDebugHandlers(&mux)
 	}
 	return &http.Server{
 		Addr:              fmt.Sprintf(":%d", config.Port),
-		Handler:           router,
+		Handler:           &mux,
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       60 * time.Second,

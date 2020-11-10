@@ -4,22 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 )
 
-func addStatusHandlers(router *httprouter.Router) {
-	router.GET("/status/users", makeRequestHandlerWithContext(handleUsers))
-	router.GET("/status/configs", makeRequestHandlerWithContext(handleConfigs))
-	router.GET("/status/databases", makeRequestHandlerWithContext(handleDatabases))
-	router.GET("/status/pools", makeRequestHandlerWithContext(handlePools))
-	router.GET("/status/clients", makeRequestHandlerWithContext(handleClients))
-	router.GET("/status/servers", makeRequestHandlerWithContext(handleServers))
-	router.GET("/status/memory", makeRequestHandlerWithContext(handleMems))
-	router.GET("/status/stats", makeRequestHandlerWithContext(handleStats))
+func addStatusHandlers(router *Mux) {
+	router.GET("/status/users", requestHandler(handleUsers))
+	router.GET("/status/configs", requestHandler(handleConfigs))
+	router.GET("/status/databases", requestHandler(handleDatabases))
+	router.GET("/status/pools", requestHandler(handlePools))
+	router.GET("/status/clients", requestHandler(handleClients))
+	router.GET("/status/servers", requestHandler(handleServers))
+	router.GET("/status/memory", requestHandler(handleMems))
+	router.GET("/status/stats", requestHandler(handleStats))
 }
 
-func handleUsers(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleUsers(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -30,7 +29,7 @@ func handleUsers(ctx context.Context, w http.ResponseWriter, _ httprouter.Params
 	return returnJSON(w, users)
 }
 
-func handleConfigs(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleConfigs(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -41,7 +40,7 @@ func handleConfigs(ctx context.Context, w http.ResponseWriter, _ httprouter.Para
 	return returnJSON(w, configs)
 }
 
-func handleDatabases(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleDatabases(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -52,7 +51,7 @@ func handleDatabases(ctx context.Context, w http.ResponseWriter, _ httprouter.Pa
 	return returnJSON(w, databases)
 }
 
-func handlePools(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handlePools(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -63,7 +62,7 @@ func handlePools(ctx context.Context, w http.ResponseWriter, _ httprouter.Params
 	return returnJSON(w, pools)
 }
 
-func handleClients(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleClients(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -74,7 +73,7 @@ func handleClients(ctx context.Context, w http.ResponseWriter, _ httprouter.Para
 	return returnJSON(w, clients)
 }
 
-func handleServers(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleServers(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -85,7 +84,7 @@ func handleServers(ctx context.Context, w http.ResponseWriter, _ httprouter.Para
 	return returnJSON(w, servers)
 }
 
-func handleMems(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleMems(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
@@ -96,7 +95,7 @@ func handleMems(ctx context.Context, w http.ResponseWriter, _ httprouter.Params)
 	return returnJSON(w, mems)
 }
 
-func handleStats(ctx context.Context, w http.ResponseWriter, _ httprouter.Params) error {
+func handleStats(ctx context.Context, w http.ResponseWriter) error {
 	if db == nil {
 		return errors.New("PGBouncer Database is not connected")
 	}
